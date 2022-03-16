@@ -1,3 +1,49 @@
+<?php 
+
+require('vendor/autoload.php');
+
+use Valitron\Validator;
+
+if(isset($_POST["submit"])){
+    $array= $_POST;
+    // print_r($array);
+    
+    $rules = [
+        'required' => ['name', 'email', 'phone', 'gender', 'hobby'],
+        'lengthmin'=> [['name', 5]],
+        'numeric' => 'phone',
+        'length' => [['phone', 10]],
+        'email' => 'email'];
+
+    $validator = new Validator($array);
+    $validator->rules($rules);
+
+    if ($validator->validate()) {
+        echo "Validation passed";
+    } else {
+        $errors = $validator->errors();
+        // print_r($errors);
+
+        foreach ($errors['name'] as $err) {
+            $nameErr[]=$err;
+        }
+        foreach ($errors['email'] as $err) {
+            $emailErr[]=$err;
+        }
+        foreach ($errors['phone'] as $err) {
+            $phoneErr[]=$err;
+        }
+        foreach ($errors['gender'] as $err) {
+            $genderErr[]=$err;
+        }
+        foreach ($errors['hobby'] as $err) {
+            $hobbyErr[]=$err;
+        }
+    }
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,11 +69,14 @@
             align-items:center;
         }
         p{
-            font-style:italic;
-            font-size: 2rem;
+            font-size: 28px;
             font-weight: bolder;
             color:white;
-            margin-bottom:3rem;
+            background-color:black;
+            margin-bottom:2rem;
+            padding: 8px 16px;
+            border: 1px solid black;
+            border-radius: 10px;
         }
         form{
             width:20rem;
@@ -39,7 +88,7 @@
             border-radius: 25px;
         }
         table{
-            border-spacing: 10px;
+            border-spacing: 5px;
         }
         table, td{
             border: 2px solid white;
@@ -52,12 +101,15 @@
         input[type="radio"], input[type="checkbox"]{
             accent-color: black;
         }
+        .error{
+            color: red;
+        }
     </style>
 </head>
 
 <body>
     <div class="form">
-        <p>Form</p>
+        <p>F O R M</p>
         <form method="post">
             <table>
                 <tbody>
@@ -66,33 +118,83 @@
                         <td><input type="text" name="name"></td>
                     </tr>
                     <tr>
+                        <td></td>
+                        <td><span class="error"><?php 
+                        if(isset($nameErr)){
+                            foreach ($nameErr as $err) {
+                                echo "*". $err . "\n";
+                            }
+                        }
+                        ?></span></td>
+                    </tr>
+                    <tr>
                         <td>Email:</td>
                         <td><input type="text" name="email" ></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><span class="error"><?php 
+                        if(isset($emailErr)){
+                            foreach ($emailErr as $err) {
+                                echo "*". $err . "<br/>";
+                            }
+                        }
+                        ?></span></td>
                     </tr>
                     <tr>
                         <td>Phone:</td>
                         <td><input type="number" name="phone" ></td>
                     </tr>
                     <tr>
+                        <td></td>
+                        <td><span class="error"><?php 
+                        if(isset($phoneErr)){
+                            foreach ($phoneErr as $err) {
+                                echo "*". $err . "<br/>";
+                            }
+                        }
+                        ?></span></td>
+                    </tr>
+                    <tr>
                         <td>Gender:</td>
                         <td>
-                            <input type="radio" name="gender" value="M">Male
-                            <input type="radio" name="gender" value="F">Female
-                            <input type="radio" name="gender" value="O">Others
+                            <input type="radio" name="gender" <?php if($_POST['gender']=='M'){echo "checked";}?> value="M">Male
+                            <input type="radio" name="gender" <?php if($_POST['gender']=='F'){echo "checked";}?> value="F">Female
+                            <input type="radio" name="gender" <?php if($_POST['gender']=='O'){echo "checked";}?> value="O">Others
                         </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><span class="error"><?php 
+                        if(isset($genderErr)){
+                            foreach ($genderErr as $err) {
+                                echo "*". $err;
+                            }
+                        }
+                        ?></span></td>
                     </tr>
                     <tr>
                         <td>Hobbies:</td>
                         <td>
-                            <input type="checkbox" name="hobby1" value="">Reading<br>
-                            <input type="checkbox" name="hobby2">Travelling<br>
-                            <input type="checkbox" name="hobby3">Listening to Music<br>
-                            <input type="checkbox" name="hobby4">Watching Anime<br>   
+                            <input type="checkbox" name="hobby" <?php if($_POST['hobby']=='1'){echo "checked";}?> value="1">Reading<br>
+                            <input type="checkbox" name="hobby" <?php if($_POST['hobby']=='2'){echo "checked";}?> value="2">Travelling<br>
+                            <input type="checkbox" name="hobby" <?php if($_POST['hobby']=='3'){echo "checked";}?> value="3">Listening to Music<br>
+                            <input type="checkbox" name="hobby" <?php if($_POST['hobby']=='4'){echo "checked";}?> value="4">Watching Anime<br>   
                         </td>                 
                     </tr>
                     <tr>
                         <td></td>
-                        <td><input type="submit" value="Submit"></td>
+                        <td><span class="error"><?php 
+                        if(isset($hobbyErr)){
+                            foreach ($hobbyErr as $err) {
+                                echo "*". $err;
+                            }
+                        }
+                        ?></span></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><input type="submit" name="submit" value="Submit"></td>
                     </tr>
                 </tbody>
             </table>
@@ -101,17 +203,4 @@
 </body>
 </html>
 
-<!-- <label for="name">Name:</label><input type="text" name="name">
-        <label for="email">E-mail:</label><input type="text" name="email">
-        <label for="phone">Phone:</label><input type="number" name="phone" >
-        <label for="gender">Gender:
-        <input type="radio" name="gender" value="M">Male
-        <input type="radio" name="gender" value="F">Female
-        </label>
-        <label for="hobby">Hobbies:
-        <input type="checkbox" name="hobby" value="">Reading <br>
-        <input type="checkbox" name="hobby">Travelling<br>
-        <input type="checkbox" name="hobby">Listening to Music<br>
-        <input type="checkbox" name="hobby">Watching Anime  
-        </label>
-        <input type="submit" value="Submit"> -->
+

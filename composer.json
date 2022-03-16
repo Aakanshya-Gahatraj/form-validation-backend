@@ -1,0 +1,6 @@
+{
+    "require": {
+        "vlucas/valitron": "^1.4",
+        "tightenco/collect": "^8.83"
+    }
+}
